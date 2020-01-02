@@ -35,109 +35,7 @@
 
 
  
-
-
-	<div class="invoice-box" id="divInvoice" style="display:none"   v-if="resumenShow">
-		<table cellpadding="0" cellspacing="0">
-		  <tbody><tr class="top">
-			<td colspan="2">
-			  <table>
-				<tbody>
-					<tr>
-					  <td colspan="2" class="title" > 
-					  	<center><h5>Cotización de Servicios</h5></center>
-					  </td>
-					  <tr>
-				  
-					<tr>
-
-
-				  <td class="title" > 
-				  	<img src="icon.png"  style="width:100%; max-width:3em;">
-				  </td>
-				  
-				  <td nowrap="nowrap" align="right">
-					Creada: {{cotizacionDesde}}<br>
-					Válida hasta: {{cotizacionHasta}}
-				  </td>
-				</tr>
-			  </tbody></table>
-			</td>
-		  </tr>
-		  
-		  <tr class="information">
-			<td colspan="2">
-			  <table>
-				<tbody><tr>
-				  <td>
-					Nirel Beauty Center.<br>
-					500 M norte final bulevar Rohrmoser.<br>
-					San José, Costa Rica.
-				  </td>
-				  
-				  <td>
-				  	Cliente<br>
-					{{cotizacionCliente}}<br>
-					{{cotizacionCorreo}}
-				  </td>
-				</tr>
-			  </tbody></table>
-			</td>
-		  </tr>
-		  
-		  <tr class="heading">
-			<td>
-			  Método de pago
-			</td>
-			
-			<td align="right">
-				<font v-if="cotizacionMetodoPago=='E'">Efectivo</font>
-				<font v-if="cotizacionMetodoPago=='T'">Transferencia</font>
-			</td>
-		  </tr>
-		  
-		  <tr class="heading">
-			<td>
-			  Item
-			</td>
-			
-			<td>
-			  Precio
-			</td>
-		  </tr>
-		  
-		  <tr class="item">
-			<td>
-			  Servicios profesionales
-			</td>
-			
-			<td>
-			  ₡{{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}
-			</td>
-		  </tr>
-		  
-		  <tr class="item">
-			<td>
-			  Mantenimiento
-			</td>
-			
-			<td>
-			  ₡{{ formatPrice(total_productos_llevar) }}
-			</td>
-		  </tr>
-		  
-		  
-		  <tr class="total">
-			<td></td>
-			
-			<td>
-			   Total: ₡{{ formatPrice((total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar) }}
-			</td>
-		  </tr>
-		</tbody>
-		</table>
-	</div>
-
+ 
 
 	<!-- Modal -->
 	<div class="modal fade" id="modalGuardarCotizacion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
@@ -300,7 +198,113 @@
 
 
  
+	<div class="invoice-box" id="divInvoice" style="display:none"   v-if="resumenShow">
+		<table cellpadding="0" cellspacing="0">
+		  <tbody>
+				<tr>
+				  <td colspan="2" class="title" > 
+				  	<center> <h5>Cotización de Servicios</h5> </center>				  	
+				  </td>
+				</tr>  
+		  	<tr class="top">
+			<td colspan="2">
+			  <table>
+				<tbody>
 
+				<tr>
+				  <td class="title" > 
+				  	<img src="icon.png" style="max-width:100%;height:3em">
+				  </td>				  
+				  <td nowrap="nowrap" align="right">
+					Creada: {{cotizacionDesde}}<br>
+					Válida hasta: {{cotizacionHasta}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="information">
+			<td colspan="2">
+			  <table>
+				<tbody><tr>
+				  <td>
+					Nirel Beauty Center.<br>
+					500 M norte final bulevar Rohrmoser.<br>
+					San José, Costa Rica.
+				  </td>
+				  
+				  <td>
+				  	Cliente<br>
+					{{cotizacionCliente}}<br>
+					{{cotizacionCorreo}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Método de pago
+			</td>
+			
+			<td align="right">
+				<font v-if="cotizacionMetodoPago=='E'">Efectivo</font>
+				<font v-if="cotizacionMetodoPago=='T'">Transferencia</font>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Item
+			</td>
+			
+			<td>
+			  Precio
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Servicios profesionales
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(  cotizacionConGanancia ) }}
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Mantenimiento
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(total_productos_llevar) }}
+			</td>
+		  </tr>
+
+		  <tr class="item">
+			<td>
+			  Impuestos (I.V.A.)
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(cotizacionConIVA-cotizacionConGanancia ) }}
+			</td>
+		  </tr>
+
+		  <tr class="total">
+			<td></td>
+			
+			<td>
+			   Total: ₡{{ formatPrice(cotizacionConIVA) }}
+			</td>
+		  </tr>
+		</tbody>
+		</table>
+	</div>
 
   <div class="container" style="margin-top:3em">
 
@@ -488,14 +492,32 @@
 						</select>
  
 				  <td style="text-align:right"> {{ formatPrice( total_price* (PorcentajeGanancia/100)  ) }}</td>
-				</tr>   
+				  
+				</tr> 
+
+
 				<tr>
-				  <td >Costos adicionales</td>
+				  <td>Costos adicionales</td>
 				  <td style="text-align:right"><input type="number" class="form-control" v-model="costosIndirectos"></td>
-				</tr>   
+				</tr>
+
+				<input type="hidden" class="form-control" v-model="this.cotizacionConGanancia =total_price + (total_price* (PorcentajeGanancia/100)) + parseInt(costosIndirectos) ">
+
+
+			 
+				<tr>
+				 
+
+				  <td>Costos I.V.A.</td>
+
+				  <td style="text-align:right"> {{ formatPrice( cotizacionConGanancia*0.13  ) }}</td>
+				</tr> 
+
+					<input type="hidden"  v-model="this.cotizacionConIVA=cotizacionConGanancia + cotizacionConGanancia*0.13">
+  
 			   <tr>
 				  <td ><b>Total Salón</b></td>
-				  <td style="text-align:right"> {{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}</td>
+				  <td style="text-align:right"> {{ formatPrice( parseInt(cotizacionConIVA)  ) }} </td>
 				</tr>    
 
 				<tr>
@@ -503,7 +525,7 @@
 				  <td style="text-align:right"> {{ formatPrice(total_productos_llevar) }}</td>
 				</tr> 
 				<tr>
-				  <input type="hidden"  v-model="this.cotizacionTotal = (total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar ">
+				  <input type="hidden"  v-model="this.cotizacionTotal = cotizacionConIVA +total_productos_llevar ">
 				  <td colspan="2" style="text-align:right"> <h4 style="color:red"> TOTAL {{ formatPrice(this.cotizacionTotal) }}</h4></td>
 				</tr> 
 
@@ -518,104 +540,7 @@
 
 <center><button class="btn btn-primary" onclick="window.print();return false;">Imprimir <i class="fas fa-print"></i></button></center>
 
-	<div class="invoice-box" id="divInvoice" style="display:none"   v-if="resumenShow">
-		<table cellpadding="0" cellspacing="0">
-		  <tbody><tr class="top">
-			<td colspan="2">
-			  <table>
-				<tbody><tr>
 
-
-				  <td class="title" > 
-				  	<div id="logoNirel"> 
-				  		<h1>NIREL</h1>
-				  		<h2>BEAUTY CENTER</h2>
-				  	</div>
-				  	<br>
-				  	<h5>Cotización de Servicios</h5>
-				  </td>
-				  
-				  <td nowrap="nowrap" align="right">
-					Creada: {{cotizacionDesde}}<br>
-					Válida hasta: {{cotizacionHasta}}
-				  </td>
-				</tr>
-			  </tbody></table>
-			</td>
-		  </tr>
-		  
-		  <tr class="information">
-			<td colspan="2">
-			  <table>
-				<tbody><tr>
-				  <td>
-					Nirel Beauty Center.<br>
-					500 M norte final bulevar Rohrmoser.<br>
-					San José, Costa Rica.
-				  </td>
-				  
-				  <td>
-				  	Cliente<br>
-					{{cotizacionCliente}}<br>
-					{{cotizacionCorreo}}
-				  </td>
-				</tr>
-			  </tbody></table>
-			</td>
-		  </tr>
-		  
-		  <tr class="heading">
-			<td>
-			  Método de pago
-			</td>
-			
-			<td align="right">
-				<font v-if="cotizacionMetodoPago=='E'">Efectivo</font>
-				<font v-if="cotizacionMetodoPago=='T'">Transferencia</font>
-			</td>
-		  </tr>
-		  
-		  <tr class="heading">
-			<td>
-			  Item
-			</td>
-			
-			<td>
-			  Precio
-			</td>
-		  </tr>
-		  
-		  <tr class="item">
-			<td>
-			  Servicios profesionales
-			</td>
-			
-			<td>
-			  ₡{{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}
-			</td>
-		  </tr>
-		  
-		  <tr class="item">
-			<td>
-			  Mantenimiento
-			</td>
-			
-			<td>
-			  ₡{{ formatPrice(total_productos_llevar) }}
-			</td>
-		  </tr>
-		  
-		  
-		  <tr class="total">
-			<td></td>
-			
-			<td>
-			   Total: ₡{{ formatPrice((total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar) }}
-			</td>
-		  </tr>
-		</tbody>
-		</table>
-	</div>
 
 </div>
 
@@ -659,6 +584,9 @@
 		cotizacionCliente:'',
 		cotizacionCorreo:'',
 		cotizacionMetodoPago:'E',
+		cotizacionTotal:0,
+		cotizacionConGanancia:0,
+		cotizacionConIVA:0,
 
 		cotizacionesOri: [],
 		cotizaciones: [],
@@ -671,6 +599,7 @@
 		quantity: 15,
 		
 		costosIndirectos: 5000,
+		costosIVA: 0,
 		PorcentajeGanancia: 50,
 		searchText:'',
 		selected: [],
