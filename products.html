@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>NIREL cotizaciones</title>
+	<!-- Font Awesome -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<!-- Bootstrap core CSS -->
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<!-- Material Design Bootstrap -->
+	<link href="css/mdb.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+	<!-- Start your project here-->
+
+
+
+
+<!--Navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark primary-color">
+
+	<!-- Navbar brand -->
+	<a class="navbar-brand" href="#">NIREL</a>
+
+	<!-- Collapse button -->
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
+		aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+
+	<!-- Collapsible content -->
+	<div class="collapse navbar-collapse" id="basicExampleNav">
+
+		<!-- Links -->
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item">
+				<a class="nav-link" >Cargar cotización</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="modal" data-target="#modalGuardarCotizacion">Guardar cotización</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link danger">Eliminar cotización</a>
+			</li>
+<!--
+			 Dropdown 
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">Dropdown</a>
+				<div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href="#">Action</a>
+					<a class="dropdown-item" href="#">Another action</a>
+					<a class="dropdown-item" href="#">Something else here</a>
+				</div>
+			</li>-->
+
+		</ul>
+		<!-- Links 
+
+		<form class="form-inline">
+			<div class="md-form my-0">
+				<input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+			</div>
+		</form>-->
+	</div>
+	<!-- Collapsible content -->
+
+</nav>
+<!--/.Navbar-->
+<div id="app">
+
+
+ 
+
+
+		<!-- Button trigger modal -->
+
+
+ 
+
+<!-- Modal -->
+<div class="modal fade" id="modalGuardarCotizacion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Guardar cotizacion</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+					<input type="text"  class="form-control mb-4" v-model="cotizacionName" placeholder="Nombre cotización">
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" @click="saveCotizacion()">Guardar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+	<div class="container" style="margin-top:3em">
+
+		<div class="row">
+				<div class="col-sm-12">
+					<!--- Solo productos para aplicar en salom-->        
+					<p class="h4 mb-12">Catálogo de Productos</p>
+						 
+						<form class="text-center border border-light" onsubmit="return false">
+								<!-- Email --> 
+								<input v-on:keyup="keymonitor" type="text" v-model="searchText" class="form-control mb-12" placeholder="Digite un producto a buscar..">
+						</form>
+			
+
+					<div class="table-responsive text-nowrap">
+
+						<table class="table" >
+							<thead>
+								<tr>
+
+									<th scope="col">Marca</th>
+									<th scope="col">Linea</th>
+									<th scope="col">Producto</th>
+									<th scope="col">Precio Costo</th>
+									<th scope="col">Precio Venta</th>
+									<th scope="col">Mililitros</th>
+									<th scope="col">Cantidad</th>
+
+								</tr>
+							</thead>
+								<tbody>
+								<tr v-for="p in productos">
+									<td> {{ p.Marca }}</td>
+									<td> {{ p.Linea }}</td>
+									<td> {{ p.Producto }}</td>
+									<td> {{ formatPrice(p.PrecioCosto) }}</td>
+									<td> {{ formatPrice(p.PrecioVenta) }}</td>
+									<td> {{ formatPrice(p.Mililitros) }}</td>
+									<td> {{ formatPrice(p.Cantidad) }}</td>
+								</tr>  
+								</tbody>
+						</table>
+
+					</div>
+				</div>
+		</div>
+	<div>  
+	<!-- /Start your project here-->
+
+	<!-- SCRIPTS -->
+	<!-- JQuery -->
+	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<!-- Bootstrap core JavaScript -->
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>
+	<!-- MDB core JavaScript -->
+	<script type="text/javascript" src="js/mdb.min.js"></script>
+
+	<script src='https://cdn.firebase.com/js/client/2.2.1/firebase.js'></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/vue.resource/1.3.1/vue-resource.min.js"></script>
+
+	<script>
+
+		var ListaTablaProducto =[];
+
+
+		Vue.config.debug = true
+
+		Vue.filter('money', function(value) {
+			return value.toFixed(2);
+		});
+
+		var app = new Vue({
+			el: '#app',
+			data: {
+				price: 20,
+				onza:29.5735,
+				quantity: 15,
+				cotizacionName: '',
+				costosIndirectos: 5000,
+				PorcentajeGanancia: 50,
+				productos: [],
+				productosOri: [],
+				searchText:''
+			},
+
+		 created:function(){      
+					this.$http.get('https://nirelapp.firebaseio.com/productos.json').then(function(response){
+						 this.productosOri =convertFirebase(response.body);
+						 this.productos=this.productosOri;
+					}, function(){
+						 alert('Error!');
+					});
+		},
+
+
+			methods:{
+				saveCotizacion(){
+
+					this.$http.put('https://nirelapp.firebaseio.com/cotizaciones.json', {
+						 cotizacion: {
+								productos:this.selected,
+								productosLlevar:this.selectedLlevar,
+								cotizacionName:this.cotizacionName
+							}
+						}, function (data, status, request) {
+							 
+						});
+				},
+
+				cargarCotizacion(){
+
+					this.$http.put('https://nirelapp.firebaseio.com/cotizaciones.json', {
+						 cotizacion: {
+								productos:this.selected,
+								productosLlevar:this.selectedLlevar,
+								cotizacionName:this.cotizacionName
+							}
+						}, function (data, status, request) {
+							 
+						});
+				},
+
+				keymonitor(){
+						 this.productos =filtrarDatos(this.productosOri,this.searchText) ;
+				},
+				formatPrice(value) {
+						let val = (value/1).toFixed(2).replace('.', ',')
+						return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+				},
+				addProducto(item) {
+					item.added=true;
+					this.selected.push(item);
+				},
+				removeProducto(item){
+						let index = this.selected.indexOf(item);
+
+						if (index > -1) {
+								item.added=false;
+								let product = this.selected[index];
+
+								this.selected.splice(index, 1);
+						}
+				},
+
+				addProductoLlevar(item) {
+					item.addedLlevar=true;
+					this.selectedLlevar.push(item);
+				},
+				removeProductoLlevar(item){
+						let index = this.selectedLlevar.indexOf(item);
+
+						if (index > -1) {
+								item.addedLlevar=false;
+								let product = this.selectedLlevar[index];
+
+								this.selectedLlevar.splice(index, 1);
+						}
+				}
+
+			},
+
+			computed:{ 
+				total_price() {
+						return this.selected.reduce(function(a,b){return parseInt(b.totalcobro)+parseInt(a)},0);
+				},
+				total_productos_llevar() {
+						return this.selectedLlevar.reduce(function(a,b){return parseInt(b.totalcostoLlevar)+parseInt(a)},0);
+				}
+			} 
+
+		});
+
+
+
+		 
+		 
+
+		function filtrarDatos(x,textoBuscar){
+		 return jQuery.grep(x, function( a ) {
+
+							 if(textoBuscar==''){ console.log(textoBuscar);
+									return true;
+							}
+						if(typeof(a['Producto'])!='undefined'){
+
+						return a['Producto'].toLowerCase().indexOf(textoBuscar.toLowerCase())>=0 
+						|| a['Marca'].toLowerCase().indexOf(textoBuscar.toLowerCase())>=0
+						|| a['Linea'].toLowerCase().indexOf(textoBuscar.toLowerCase())>=0  
+						}
+						else{
+							return false;
+						}
+						;
+					});
+		}
+
+
+		function convertFirebase(x){
+			var retorno = [];
+			$.each(x, function(i, val) {
+				val.id = i;
+				 val.measure = [
+												{ text: 'mm', value: 1 },
+												{ text: 'onz', value: 29.5735 }
+											];
+				val.miliused = 0;
+				val.measureSelected = 1;
+				val.cantidadLlevar = 1;
+				val.added = false;
+				val.addedLlevar = false;
+				val.totalcobro = 0;
+				val.totalcostoLlevar = 0;
+				retorno.push(val);
+			});
+			return retorno;
+		}
+
+	</script>
+
+</body>
+
+</html>

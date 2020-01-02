@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.nirel.nirelapp" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:gap="http://phonegap.com/ns/1.0">
+  <name>NirelApp</name>
+  <description>This is the best app ever NIREL.</description>
+  <author email="info@myapp.com" href="http://www.myapp.com">Frederick Castro</author>
+  <preference name="permissions" value="none" />
+  <preference name="orientation" value="portrait" />
+  <preference name="target-device" value="universal" />
+  <preference name="fullscreen" value="false" />
+  <access uri="https://*.firebaseio.com" subdomains="true"/>
+  <access origin="*" />
+  <allow-intent href="*" />
+  <allow-navigation href="*" />
+  <icon src="icon.png" />
+  <splash src="icon.png" />
+  <gap:plugin name="cordova-plugin-whitelist" source="npm" />
+  <platform name="android">
+    <allow-intent href="market:*" />
+    <access origin="*" />
+    <allow-intent href="*" />
+    <allow-navigation href="*" />
+  </platform>
+</widget>
+
+ 

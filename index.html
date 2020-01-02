@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta http-equiv="x-ua-compatible" content="ie=edge">
+	<title>NIREL</title>
+	<link rel="stylesheet" href="css/font-awesome.min.css">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/mdb.min.css" rel="stylesheet">
+	<link href="css/all.min.css" rel="stylesheet">
+	<link href="css/invoice.css" rel="stylesheet">
+  </head>
+
+
+ <style media="print">
+  #divInvoice{ display: block !important; }
+  .container{ display: none !important; }
+  
+</style> 
+  <body>
+	<!-- Start your project here-->
+ 
+
+ 
+	<!--Navbar-->
+	<div id="app">
+	  <nav class="navbar navbar-expand-lg navbar-dark primary-color">
+		<!-- Navbar brand -->
+		<a class="navbar-brand" href="#">NIREL</a>
+	  </nav>
+	<!--/.Navbar-->
+	<!-- Button trigger modal --> 
+
+
+
+ 
+
+
+	<div class="invoice-box" id="divInvoice" style="display:none"   v-if="resumenShow">
+		<table cellpadding="0" cellspacing="0">
+		  <tbody><tr class="top">
+			<td colspan="2">
+			  <table>
+				<tbody>
+					<tr>
+					  <td colspan="2" class="title" > 
+					  	<center><h5>Cotización de Servicios</h5></center>
+					  </td>
+					  <tr>
+				  
+					<tr>
+
+
+				  <td class="title" > 
+				  	<img src="icon.png"  style="width:100%; max-width:3em;">
+				  </td>
+				  
+				  <td nowrap="nowrap" align="right">
+					Creada: {{cotizacionDesde}}<br>
+					Válida hasta: {{cotizacionHasta}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="information">
+			<td colspan="2">
+			  <table>
+				<tbody><tr>
+				  <td>
+					Nirel Beauty Center.<br>
+					500 M norte final bulevar Rohrmoser.<br>
+					San José, Costa Rica.
+				  </td>
+				  
+				  <td>
+				  	Cliente<br>
+					{{cotizacionCliente}}<br>
+					{{cotizacionCorreo}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Método de pago
+			</td>
+			
+			<td align="right">
+				<font v-if="cotizacionMetodoPago=='E'">Efectivo</font>
+				<font v-if="cotizacionMetodoPago=='T'">Transferencia</font>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Item
+			</td>
+			
+			<td>
+			  Precio
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Servicios profesionales
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Mantenimiento
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(total_productos_llevar) }}
+			</td>
+		  </tr>
+		  
+		  
+		  <tr class="total">
+			<td></td>
+			
+			<td>
+			   Total: ₡{{ formatPrice((total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar) }}
+			</td>
+		  </tr>
+		</tbody>
+		</table>
+	</div>
+
+
+	<!-- Modal -->
+	<div class="modal fade" id="modalGuardarCotizacion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	  aria-hidden="true">
+	  <div class="modal-dialog" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Guardar cotizacion</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">
+			  <input type="text"  class="form-control mb-4" v-model="cotizacionName" placeholder="Nombre cotización">
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+			<button type="button" class="btn btn-primary" @click="saveCotizacion('new')">Guardar</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="modalProductosSalon" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	  aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Búsqueda de produtos</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">            
+				<form class="text-center border border-light" onsubmit="return false">
+					<!-- Email --> 
+					<input v-on:keyup="keymonitor" type="text" v-model="searchText" class="form-control mb-4" placeholder="Digite un producto a buscar..">
+				</form>
+				<div class="table-responsive text-nowrap">
+				  <table class="table" id="tabla">
+					<thead>
+					  <tr>
+						<th scope="col"></th>
+						<th scope="col">Linea</th>
+						<th scope="col">Producto</th>
+						<th scope="col">Precio Costo</th>
+					  </tr>
+					</thead>
+					  <tbody>
+					  <tr v-for="p in productos">
+						<td>
+							<i class="fas fa-plus-circle" @click="addProducto(p)" v-if="!p.added"></i>
+							<i class="fas fa-minus-circle" @click="removeProducto(p)" v-if="p.added"></i>
+						</td>
+						<td>{{ p.Linea }}</td>
+						<td> {{ p.Producto }}</td>
+						<td> {{  formatPrice(p.PrecioCosto)}}</td>
+					  </tr>    
+					  </tbody>
+				  </table>
+				</div>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+
+	<div class="modal fade" id="modalProductosLlevar" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	  aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Búsqueda de produtos</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">            
+				<form class="text-center border border-light" onsubmit="return false">
+					<!-- Email --> 
+					<input v-on:keyup="keymonitor" type="text" v-model="searchText" class="form-control mb-4" placeholder="Digite un producto a buscar..">
+				</form>
+				<div class="table-responsive">
+				  <table class="table" id="tabla">
+					<thead>
+					  <tr>
+						<th scope="col"></th>
+						<th scope="col">Linea</th>
+						<th scope="col">Producto</th>
+						<th scope="col">Precio Costo</th>
+					  </tr>
+					</thead>
+					  <tbody>
+					  <tr v-for="p in productos">
+						<td>
+							<i class="fas fa-plus-circle" @click="addProductoLlevar(p)" v-if="!p.addedLlevar"></i>
+							<i class="fas fa-minus-circle" @click="removeProductoLlevar(p)" v-if="p.addedLlevar"></i>
+						</td>
+						<td>{{ p.Linea }}</td>
+						<td>{{ p.Producto }}</td>
+						<td>{{ formatPrice(p.PrecioCosto)}}</td>
+					  </tr>    
+					  </tbody>
+				  </table>
+				</div>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+	<div class="modal fade" id="modalCotizaciones" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+	  aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+		  <div class="modal-header">
+			<h5 class="modal-title" id="exampleModalLabel">Búsqueda de Cotizaciones</h5>
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+			  <span aria-hidden="true">&times;</span>
+			</button>
+		  </div>
+		  <div class="modal-body">            
+				<form class="text-center border border-light" onsubmit="return false">
+					<!-- Email --> 
+					<input v-on:keyup="keymonitorCotiza()" type="text" v-model="searchTextCotizacion" class="form-control mb-4" placeholder="Digite la cotización a buscar..">
+				</form>
+				<div class="table-responsive text-nowrap">
+				  <table class="table" id="tabla">
+					<thead>
+					  <tr>
+						<th scope="col"></th>
+						<th scope="col">Nombre</th>
+						<th scope="col">Total</th>
+					  </tr>
+					</thead>
+					  <tbody>
+					  <tr v-for="(c, index) in cotizaciones">
+						<td>
+							<button type="button" @click="cargarCotizacion(c,index)" class="btn btn-sm btn-success">Cargar</button>
+						</td>
+						<td> {{ c.cotizacionName }}</td>
+						<td> {{ formatPrice(c.cotizacionTotal) }}</td>
+					  </tr>    
+					  </tbody>
+				  </table>
+				</div>
+		  </div>
+		  <div class="modal-footer">
+			<button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+		  </div>
+		</div>
+	  </div>
+	</div>
+
+
+ 
+
+
+  <div class="container" style="margin-top:3em">
+
+		  <center>
+		 
+
+		 <button class="btn btn-primary" data-toggle="modal" data-target="#modalCotizaciones">Cargar <i class="fas fa-file-archive mr-1"></i></button>
+		<button class="btn btn-default" data-toggle="modal" data-target="#modalGuardarCotizacion" v-if="!showInfoCotizacion">Guardar <i class="fas fa-save ml-1"></i></button>
+		  </center> 
+
+
+				
+		
+	<div id="dirError" v-if="errorShow" class="danger">
+	  {{this.errorMsj}}
+	</div>
+
+
+
+	<div class="row" v-if="showInfoCotizacion">
+		<div class="col-sm-12">
+		  <p class="h4 mb-4">Cotización: {{cotizacionName}}</p>
+
+		  <button type="button" class="btn btn-primary btn-sm" @click="saveCotizacion('modify')">Guardar</button>
+		  <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modalGuardarCotizacion">Crear copia</button>
+		  <button type="button" class="btn btn-info btn-sm" @click="limpiarCotizacion()">Nueva</button>
+		  <button type="button" class="btn btn-danger btn-sm" @click="removeCotizacion()">Eliminar</button>
+		</div>
+	</div>    
+	<form>
+		<p class="h4 mb-12">Información general</p>
+	  <div class="form-group">
+	    <label for="validaDesde">Válida desde:</label>
+	    <input type="date" class="form-control" id="validaDesde" v-model="cotizacionDesde">
+	  </div>
+	  <div class="form-group">
+	    <label for="validaHasta">Válida hasta:</label>
+	    <input type="date" class="form-control" id="validaHasta" v-model="cotizacionHasta">
+	  </div>
+	  <div class="form-group">
+	    <label for="cliente">Nombre cliente:</label>
+	    <input type="input" class="form-control" id="cliente" v-model="cotizacionCliente">
+	  </div>
+	  <div class="form-group">
+	    <label for="cliente">Correo cliente:</label>
+	    <input type="email" class="form-control" id="correo" v-model="cotizacionCorreo">
+	  </div>
+	  <div class="form-group">
+	    <label for="correo">Método pago:</label>
+	    <select class="form-class"  v-model="cotizacionMetodoPago">
+					<option value="E">Efectivo</option>
+					<option value="T">Transferencia</option>
+				</select>
+	  </div>
+	</form>  
+	<div class="row">
+
+		<div class="col-sm-8">
+
+		  <!--- Solo productos para aplicar en salom-->        
+		  <p class="h4 mb-4">Productos para salón <i class="fas fa-plus-circle" data-toggle="modal" data-target="#modalProductosSalon"></i></p>
+
+		  <div class="table-responsive">
+
+			<table class="table" >
+			  <thead>
+				<tr>
+				  <th scope="col"></th>
+				  <th scope="col">Producto</th>
+				  <th scope="col">Cantidad</th>
+				  <th scope="col">Total</th>
+				</tr>
+			  </thead>
+				<tbody>
+				<tr v-for="p in selected">
+				  <td><i class="fas fa-minus-circle" @click="removeProducto(p)"></i></td>
+				  <td>{{ p.Producto }} ({{ formatPrice(p.PrecioCosto) }})</td>
+				  <td nowrap="nowrap">
+					  <select v-model="p.measureSelected" style="width: 3em;display: inherit;padding: 0;" class="form-control">
+						  <option v-for="option in p.measure" v-bind:value="option.value">
+							{{ option.text }}
+						  </option>
+						</select>
+					  <input type="number" v-model="p.miliused" class="form-control" style="width: 3em;display: inherit;padding: 2px;">   
+				  </td>
+				  <td> <input type="hidden" v-model.number="p.totalcobro = (p.PrecioCosto /p.Mililitros) *p.miliused*p.measureSelected">{{formatPrice(p.totalcobro)}}</td>
+				</tr>  
+				</tbody>
+			</table>
+
+		  </div>
+
+		  <p class="h4 mb-4">Productos para hogar <i class="fas fa-plus-circle" data-toggle="modal" data-target="#modalProductosLlevar"></i></p>
+
+		  <div class="table-responsive">
+
+			<table class="table" >
+			  <thead>
+				<tr>
+				  <th scope="col"></th>
+				  <th scope="col">Producto</th>
+				  <th scope="col">Precio Costo</th>
+				   <th scope="col">Cantidad</th>
+				  <th scope="col">Total</th>
+				</tr>
+			  </thead>
+				<tbody>
+				<tr v-for="p in selectedLlevar">
+				  <td> <i class="fas fa-minus-circle" @click="removeProductoLlevar(p)"></i></td>
+				  <td> {{ p.Producto }}</td>
+				  <td> {{ formatPrice(p.PrecioVenta) }}</td>
+				  <td>
+					 <select v-model="p.cantidadLlevar" class="form-control">
+						  <option value="1">1</option>
+						  <option value="2">2</option>
+						  <option value="3">3</option>
+						  <option value="4">4</option>
+						  <option value="5">5</option>
+						  <option value="6">6</option>
+						  <option value="7">7</option>
+						  <option value="8">8</option>
+						  <option value="9">9</option>
+						  <option value="10">10</option>
+						  <option value="11">11</option>
+						  <option value="12">12</option>
+						  <option value="13">13</option>
+						  <option value="14">14</option>
+						  <option value="15">15</option>
+						  <option value="16">16</option>
+						  <option value="17">17</option>
+						  <option value="18">18</option>
+						  <option value="19">19</option>
+						  <option value="20">20</option>
+						</select>
+				  <td>
+				  <input type="hidden" v-model.number="p.totalcostoLlevar = p.PrecioVenta * p.cantidadLlevar">
+
+				   {{ formatPrice(p.totalcostoLlevar) }}
+
+				 </td>
+				</tr>  
+				</tbody>
+			</table>
+
+		  </div>
+		</div>
+ 
+
+		<div class="col-sm-4">
+		  <p class="h4 mb-4">Resumen cotización</p>
+
+
+		  <div class="table-responsive text-nowrap">
+
+			<table class="table" >
+				<tbody>
+				<tr>
+				  <td 
+				  >Total Productos para salón</td>
+				  <td style="text-align:right"> {{ formatPrice(total_price) }}</td>
+				</tr>  
+			   <tr>
+				  <td >% Ganancia <select style="width: 4em;padding: 0;display: inherit;margin-left: 1em;" v-model="PorcentajeGanancia" class="form-control">
+						  <option value="100">100%</option>
+						  <option value="95">95%</option>
+						  <option value="90">90%</option>
+						  <option value="85">85%</option>
+						  <option value="80">80%</option>
+						  <option value="75">75%</option>
+						  <option value="70">70%</option>
+						  <option value="65">65%</option>
+						  <option value="60">60%</option>
+						  <option value="55">55%</option>
+						  <option value="50">50%</option>
+						  <option value="45">45%</option>
+						  <option value="40">40%</option>
+						  <option value="35">35%</option>
+						  <option value="30">30%</option>
+						  <option value="25">25%</option>
+						  <option value="20">20%</option>
+						  <option value="15">15%</option>
+						  <option value="10">10%</option>
+						  <option value="5">5%</option>
+						  <option value="0">0%</option>
+						</select>
+ 
+				  <td style="text-align:right"> {{ formatPrice( total_price* (PorcentajeGanancia/100)  ) }}</td>
+				</tr>   
+				<tr>
+				  <td >Costos adicionales</td>
+				  <td style="text-align:right"><input type="number" class="form-control" v-model="costosIndirectos"></td>
+				</tr>   
+			   <tr>
+				  <td ><b>Total Salón</b></td>
+				  <td style="text-align:right"> {{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}</td>
+				</tr>    
+
+				<tr>
+				  <td ><b>Total Productos de mantenimiento</b></td>
+				  <td style="text-align:right"> {{ formatPrice(total_productos_llevar) }}</td>
+				</tr> 
+				<tr>
+				  <input type="hidden"  v-model="this.cotizacionTotal = (total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar ">
+				  <td colspan="2" style="text-align:right"> <h4 style="color:red"> TOTAL {{ formatPrice(this.cotizacionTotal) }}</h4></td>
+				</tr> 
+
+
+				</tbody>
+			</table>
+
+		  </div>
+		</div>
+	</div>
+  <div> 
+
+<center><button class="btn btn-primary" onclick="window.print();return false;">Imprimir <i class="fas fa-print"></i></button></center>
+
+	<div class="invoice-box" id="divInvoice" style="display:none"   v-if="resumenShow">
+		<table cellpadding="0" cellspacing="0">
+		  <tbody><tr class="top">
+			<td colspan="2">
+			  <table>
+				<tbody><tr>
+
+
+				  <td class="title" > 
+				  	<div id="logoNirel"> 
+				  		<h1>NIREL</h1>
+				  		<h2>BEAUTY CENTER</h2>
+				  	</div>
+				  	<br>
+				  	<h5>Cotización de Servicios</h5>
+				  </td>
+				  
+				  <td nowrap="nowrap" align="right">
+					Creada: {{cotizacionDesde}}<br>
+					Válida hasta: {{cotizacionHasta}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="information">
+			<td colspan="2">
+			  <table>
+				<tbody><tr>
+				  <td>
+					Nirel Beauty Center.<br>
+					500 M norte final bulevar Rohrmoser.<br>
+					San José, Costa Rica.
+				  </td>
+				  
+				  <td>
+				  	Cliente<br>
+					{{cotizacionCliente}}<br>
+					{{cotizacionCorreo}}
+				  </td>
+				</tr>
+			  </tbody></table>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Método de pago
+			</td>
+			
+			<td align="right">
+				<font v-if="cotizacionMetodoPago=='E'">Efectivo</font>
+				<font v-if="cotizacionMetodoPago=='T'">Transferencia</font>
+			</td>
+		  </tr>
+		  
+		  <tr class="heading">
+			<td>
+			  Item
+			</td>
+			
+			<td>
+			  Precio
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Servicios profesionales
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(  total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)  ) }}
+			</td>
+		  </tr>
+		  
+		  <tr class="item">
+			<td>
+			  Mantenimiento
+			</td>
+			
+			<td>
+			  ₡{{ formatPrice(total_productos_llevar) }}
+			</td>
+		  </tr>
+		  
+		  
+		  <tr class="total">
+			<td></td>
+			
+			<td>
+			   Total: ₡{{ formatPrice((total_price +total_price* (PorcentajeGanancia/100) + parseInt(costosIndirectos)) +total_productos_llevar) }}
+			</td>
+		  </tr>
+		</tbody>
+		</table>
+	</div>
+
+</div>
+
+
+
+
+  <!-- /Start your project here-->
+
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="js/mdb.min.js"></script>
+
+  <script src='js/firebase.js'></script>
+  <script src="js/vue.min.js"></script>
+  <script src="js/vue-resource.min.js"></script>
+
+  <script>
+
+	var ListaTablaProducto =[];
+	var myCanvas;
+
+	Vue.config.debug = true
+
+	Vue.filter('money', function(value) {
+	  return value.toFixed(2);
+	});
+
+	var app = new Vue({
+	  el: '#app',
+	  data: {
+		searchTextCotizacion:'',
+		showInfoCotizacion: false,
+		cotizacionindex: -1,
+		cotizacionName: '',
+		cotizacionDesde:'',
+		cotizacionHasta:'',
+		cotizacionCliente:'',
+		cotizacionCorreo:'',
+		cotizacionMetodoPago:'E',
+
+		cotizacionesOri: [],
+		cotizaciones: [],
+		Total:0,
+
+		productosOri: [],
+		productos: [],
+		price: 20,
+		onza:29.5735,
+		quantity: 15,
+		
+		costosIndirectos: 5000,
+		PorcentajeGanancia: 50,
+		searchText:'',
+		selected: [],
+		selectedLlevar: [],
+		errorMsj:'',
+		errorShow:false,
+
+		resumenShow:true
+	  },
+
+	 created:function(){      
+		  this.$http.get('https://nirelapp.firebaseio.com/productos.json').then(function(response){
+			 this.productosOri =convertFirebase(response.body);
+			 this.productos=this.productosOri;
+		  }, function(e){
+			 this.errorHandle('Sin Conexión a Internet');
+		  });
+		  this.$http.get('https://nirelapp.firebaseio.com/cotizaciones.json').then(function(response){
+			 this.cotizacionesOri =response.body.cotizacion;
+			 this.cotizaciones=this.cotizacionesOri;
+		  }, function(e){
+		  });
+	},
+
+
+	  methods:{
+		saveCotizacion(action){
+		
+		  let cotizacionSelected = {
+			  productos:this.selected,
+			  productosLlevar:this.selectedLlevar,
+			  cotizacionName:this.cotizacionName,
+			  cotizacionTotal:parseInt(this.cotizacionTotal),
+			  cotizacionPorcentajeGanancia:parseInt(this.PorcentajeGanancia),
+			  cotizacionCostosIndirectos:parseInt(this.costosIndirectos),
+				cotizacionDesde : this.cotizacionDesde,
+				cotizacionHasta : this.cotizacionHasta,
+				cotizacionCliente : this.cotizacionCliente,
+				cotizacionCorreo : this.cotizacionCorreo,
+				cotizacionMetodoPago : this.cotizacionMetodoPago
+
+		  }  
+		  console.log(cotizacionSelected);
+
+		  if(action == 'new'){
+			this.cotizaciones.push(cotizacionSelected);
+		  }
+
+		  if(action == 'modify' && this.cotizacionindex!=-1){
+			this.cotizaciones[this.cotizacionindex]=cotizacionSelected;;
+		  }
+
+ 
+		  this.$http.put('https://nirelapp.firebaseio.com/cotizaciones.json', {
+			 cotizacion: this.cotizaciones
+			}, function (data, status, request) {});
+		  this.showInfoCotizacion=true;
+		  $("#modalGuardarCotizacion .close").click();
+		  alert("Guardada");
+		},
+
+
+		cargarCotizacion(e,index){
+
+				this.limpiarCotizacion();
+
+				if(typeof(e.productos)!='undefined'){
+				  this.selected = e.productos;
+				}
+				if(typeof(e.productosLlevar)!='undefined'){
+				  this.selectedLlevar = e.productosLlevar;
+				}
+				this.cotizacionName = e.cotizacionName;
+				this.costosIndirectos = e.cotizacionCostosIndirectos;
+				this.PorcentajeGanancia = e.cotizacionPorcentajeGanancia;
+
+				this.cotizacionDesde = e.cotizacionDesde;
+				this.cotizacionHasta = e.cotizacionHasta;
+				this.cotizacionCliente = e.cotizacionCliente;
+				this.cotizacionCorreo = e.cotizacionCorreo;
+				this.cotizacionMetodoPago = e.cotizacionMetodoPago;
+
+
+				this.cotizacionindex = index;
+
+				$("#modalCotizaciones .close").click();
+				this.showInfoCotizacion=true;
+		},
+		keymonitor(){
+			 this.productos =filtrarDatos(this.productosOri,'Producto',this.searchText) ;
+		},
+		keymonitorCotiza(){
+			 this.cotizaciones =filtrarDatos(this.cotizacionesOri,'cotizacionName',this.searchTextCotizacion) ;
+		},
+		formatPrice(value) {
+			let val = (value/1).toFixed(2).replace('.', ',')
+			return val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+		},
+		addProducto(item) {
+		  item.added=true;
+		  this.selected.push(item);
+		},
+		removeCotizacion(){
+		  if(!confirm('Desea eliminar la cotización?')){
+			return false;
+		  }
+
+			let index = this.cotizacionindex;
+			if (index > -1) {
+				this.cotizaciones.splice(index, 1);
+			}
+
+			this.saveCotizacion('modify');
+			
+			this.limpiarCotizacion();
+		},
+
+		limpiarCotizacion(){
+			this.selected =[];
+			this.selectedLlevar = [];
+			this.cotizacionName = '';
+			this.cotizacionindex = -1;
+			this.showInfoCotizacion=false;
+			this.costosIndirectos=5000;
+			this.PorcentajeGanancia=50;
+		},
+
+
+		removeProducto(item){
+
+			let index = this.selected.indexOf(item);
+
+			if (index > -1) {
+				item.added=false;
+				let product = this.selected[index];
+
+				this.selected.splice(index, 1);
+			}
+		},
+
+		addProductoLlevar(item) {
+		  item.addedLlevar=true;
+		  this.selectedLlevar.push(item);
+		},
+		removeProductoLlevar(item){
+			let index = this.selectedLlevar.indexOf(item);
+
+			if (index > -1) {
+				item.addedLlevar=false;
+				let product = this.selectedLlevar[index];
+
+				this.selectedLlevar.splice(index, 1);
+			}
+
+
+
+		},
+
+		errorHandle(e){
+			this.errorMsj+='-'+e;
+			this.errorShow=true;
+		},
+
+	  },
+
+	  computed:{ 
+		total_price() {
+			return this.selected.reduce(function(a,b){return parseInt(b.totalcobro)+parseInt(a)},0);
+		},
+		costosIndirectosToNumber() {
+			return parseInt(costosIndirectos);
+		},
+		total_productos_llevar() {
+			return this.selectedLlevar.reduce(function(a,b){return parseInt(b.totalcostoLlevar)+parseInt(a)},0);
+		}
+	  } 
+
+	});
+
+
+
+	 
+	 
+
+	function filtrarDatos(x,index,textoBuscar){
+	 return jQuery.grep(x, function( a ) {
+
+			   if(textoBuscar==''){ 
+				  return true;
+			  }
+
+			if(typeof(a[index])!='undefined'){
+
+			return a[index].toLowerCase().indexOf(textoBuscar.toLowerCase())>=0  
+			}
+			else{
+			  return false;
+			}
+			;
+		  });
+	}
+
+
+	function convertFirebase(x){
+	  var retorno = [];
+	  $.each(x, function(i, val) {
+		val.id = i;
+		 val.measure = [
+						{ text: 'ml', value: 1 },
+						{ text: 'onz', value: 29.5735 }
+					  ];
+		val.miliused = 0;
+		val.measureSelected = 1;
+		val.cantidadLlevar = 1;
+		val.added = false;
+		val.addedLlevar = false;
+		val.totalcobro = 0;
+		val.totalcostoLlevar = 0;
+		retorno.push(val);
+	  });
+	  return retorno;
+	}
+
+   function makeScreenshot()
+    {
+    	$("#divInvoice").show();
+    }
+</script>
+
+
+
+
+
+
+
+</body>
+
+</html>
